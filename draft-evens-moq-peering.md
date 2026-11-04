@@ -1,7 +1,7 @@
 ---
 title: "Media over QUIC Relay Peering Protocol"
-abbrev: moq-relay-peering
-docname: draft-evens-moq-relay-peering-latest
+abbrev: moq-peering
+docname: draft-evens-moq-peering-latest
 date: {DATE}
 category: std
 
@@ -16,8 +16,8 @@ venue:
   type: "Working Group"
   mail: "moq@ietf.org"
   arch: "https://mailarchive.ietf.org/arch/browse/moq/"
-  github: "timevens/moq-relay-peering"
-  latest: "https://timevens.github.io/moq-relay-peering/draft-evens-moq-relay-peering.html"
+  github: "TimEvens/draft-evens-moq-peering"
+  latest: "https://timevens.github.io/draft-evens-moq-peering/draft-evens-moq-peering.html"
 
 stand_alone: yes
 smart_quotes: no

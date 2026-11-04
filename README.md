@@ -1,4 +1,4 @@
-# draft-evens-moq-relay-peering
+# draft-evens-moq-peering
 
 ## Contributing
 See the [guidelines for contributions](CONTRIBUTING.md).
