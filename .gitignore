@@ -1,0 +1,5 @@
+/deps/
+/node_modules/
+/package-lock.json
+/.requirements.txt
+/Gemfile.lock
