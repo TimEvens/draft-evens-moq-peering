@@ -163,7 +163,7 @@ Publisher --> Origin Edge --+--> Subscriber Edge --> Subscriber
 ~~~
 {: artwork-align="center" artwork-name="Direct edge-to-edge forwarding" }
 
-When several subscriber Edges share a region, or when the direct path is not allowed, the origin Edge forwards to a Via. The Via splits the same objects toward the subscriber Edges. Further Via hops MAY be added to steer the network path. Via nodes can be added or removed for a track without resetting the publisher's {{MOQT}} session. An object stream already open on the previous hop drains there. A new stream and every datagram use the new hop.
+When several subscriber Edges share a region, or when the direct path is not allowed, the origin Edge forwards to a Via. The Via splits the same objects toward the subscriber Edges. Further Via hops MAY be added to steer the network path. Via nodes can be added or removed for a track without resetting the publisher's {{MOQT}} session. An object stream already open on the previous hop drains there, as specified in {{path-change}}. A new stream and every datagram use the new hop.
 
 ~~~
 Publisher --> Origin Edge --> Via --> Subscriber Edge --> Subscriber
@@ -171,6 +171,16 @@ Publisher --> Origin Edge --> Via --> Subscriber Edge --> Subscriber
                                 +----> Subscriber Edge --> Subscriber
 ~~~
 {: artwork-align="center" artwork-name="Forwarding through a Via" }
+
+## End-to-End Example
+
+A publisher and a subscriber meet through two Edges. A Stub, when one is present, is hidden behind its parent Edge.
+
+1. The publisher announces at an Edge, or at a Stub. The Edge that owns the publisher originates an announce whose source Node ID is that Edge. A Stub's parent uses its own Node ID, so the rest of the network does not see the Stub. Control peering floods the announce.
+2. The subscriber subscribes at an Edge, or at a Stub. That Edge originates one subscribe for the track, again under its own Node ID. Many local clients, including clients of a Stub, collapse to that one subscribe. Control peering carries it toward the origin Edge.
+3. The origin Edge matches the subscribe to the announce by the namespace and the full-name hash. It selects a data session toward the subscriber Edge. The session may be direct or may pass through one or more Via nodes.
+4. The origin creates a subscriber node set on that data session. The set lists the subscriber Edge. Each hop that receives the set chooses its own next data session and advertises the subset of Node IDs that use that session.
+5. Objects follow those data sessions. The header names the set identifier and the full-name hash. The subscriber Edge removes the peering header and delivers the objects to its local subscriber, or to the Stub on the combined session the Stub opened.
 
 # Peering Sessions
 
@@ -182,7 +192,9 @@ There is one control relationship between two nodes. If both nodes open a sessio
 
 When a control session ends, each side removes node, announce, and subscribe state learned only through that session and selects paths again. Object state that belongs to a data session is removed when that data session ends.
 
-The initiator of a session opens one bidirectional QUIC stream and sends every control message on it. CONNECT is the first message. The acceptor latches onto that stream and sends CONNECT_RESPONSE and later control messages on it. The initiator MAY open a replacement bidirectional stream. The acceptor adopts the new stream when a control message arrives on it and resets the previous control stream if that stream is still open. Two control streams are not in use at once.
+The initiator of a session opens one bidirectional QUIC stream and sends every control message on it. CONNECT is the first message. The acceptor does not open a bidirectional stream. It latches onto the initiator's stream and sends CONNECT_RESPONSE and later control messages on it.
+
+The initiator MAY open a replacement bidirectional stream. The acceptor keeps using the current control stream until a complete, well-formed control message arrives on the new stream. That message adopts the new stream as the control stream. The acceptor then resets the previous control stream with application error SWITCH_NEW_STREAM when that stream is still open. A new stream whose first complete message is malformed is reset, and the current control stream stays in use. Two control streams are not in use at once. A bidirectional stream that arrives at the initiator, which did not open it, is reset. The initiator continues to use the stream it opened.
 
 ## Data Peering
 
@@ -294,7 +306,7 @@ Longitude, Latitude:
 : The node location in degrees, as binary64 values. Policy use of these values is deployment-specific.
 
 Metric:
-: An unsigned 64-bit cost. Lower sums are preferred. The default is 100. A peering session that is configured with a higher cost advertises that higher cost in place of the node metric on that session only.
+: An unsigned 64-bit cost. Lower sums are preferred. The default node metric is 100. Let `M` be the node metric and `S` the metric configured for one peering session. The cost advertised on that session, in a self-advertisement and in a path item this node appends, is `max(M, S)`. A session metric lower than or equal to `M` leaves the advertised cost equal to `M`.
 
 Path:
 : The ordered list of hops that forwarded this advertisement. Empty when the node advertises itself.
@@ -318,17 +330,23 @@ Sum of metrics is the advertised node metric plus the metric in every path item.
 
 The announce information base records namespaces and tracks that publishers have announced. An Edge or Stub originates an entry when a local publisher announces. The source Node ID is the Edge that owns the publisher. A Stub's parent uses its own Node ID.
 
-An entry is either a single track or a namespace that covers many tracks. Namespace entries omit the track name. Receivers index entries by the full-name hash and by successive namespace-tuple hashes so a later subscribe can find a matching announce.
+An entry is either a single track or a namespace that covers many tracks. Both kinds carry the namespace tuples. A namespace entry has an empty track name. Receivers index entries by the full-name hash and by successive namespace-tuple hashes so a later subscribe can find a matching announce. The full-name hash is checked against those octets as defined in {{announce-info}}.
 
 Announce state is flooded on control peering, subject to policy. A relay MAY drop an announcement on input or on output. A subscriber relay uses the entries it keeps to answer a {{MOQT}} subscriber and to learn publisher parameters that were conveyed by the local {{MOQT}} stack. Relays that only forward peering messages use the hash and the source Node ID.
 
 A withdrawal is sent when the publisher unannounces. The withdrawal is propagated on control peering the same way as the advertisement. Duplicate advertisements for the same source and full-name hash are not forwarded again.
 
-## Subscribe Information Base
+## Subscribe Information Base {#subscribe-ib}
 
-The subscribe information base records active subscribes. The subscriber relay originates an entry when it accepts a {{MOQT}} subscribe, or when its Stub child sends one. The source Node ID is that Edge. One entry represents the subscriber relay, not each local client. Many clients on one Edge collapse to one peering subscribe per track.
+The subscribe information base records active subscribes. The subscriber relay originates an entry when it accepts a {{MOQT}} subscribe, or when its Stub child sends one. The source Node ID is that Edge. One entry represents the subscriber relay, not each local client. Many clients on one Edge collapse to one peering subscribe per track. Different subscribe parameters do not create another entry. A later update replaces the parameters of that same entry.
 
-Each advertisement and withdrawal from the source node carries a 16-bit sequence number. The source node increments it by one for that subscribe, wrapping from 65535 to 0. Intermediate nodes forward the sequence unchanged. A received sequence is newer when the unsigned 16-bit distance `(received - stored) mod 65536` is in the range 1 through 32767. An equal sequence, and a distance of 32768 through 65535, is not newer and MUST be ignored. This keeps a withdrawal and a following advertisement ordered when propagation reorders them.
+Each advertisement and withdrawal of an entry carries a 16-bit sequence number. The sequence number is used only to detect a delayed update. It is not part of the entry identity. The entry identity is the source Node ID and the track. The source node increments the sequence number by one for each update of that entry, wrapping from 65535 to 0. Intermediate nodes forward the sequence unchanged.
+
+A receiver stores the greatest sequence number it has accepted for that source and track. Withdrawing the entry removes the subscribe and updates the forwarding information base, and the receiver keeps that sequence number while the source is still reachable. A later advertisement or withdrawal is accepted only when its sequence number is greater. When a message arrives with a lower sequence number, that message is a delayed update and MUST be ignored, because a greater sequence number was already received. An equal sequence number MUST be ignored. This stops a delayed advertisement from restoring a subscribe that was withdrawn. The comparison uses the unsigned distance `(received - stored) mod 65536`. A distance of 1 through 32767 means the received sequence is greater, so after the counter wraps, 0 is greater than 65535. A distance of 32768 through 65535 means the received sequence is lower.
+
+When the source Node ID is removed from the node information base, the receiver starts a retention interval for the sequence numbers of that source. The interval is 30 seconds and is not negotiated. While it runs, the retained sequences stay in force, so a source that returns and continues its counter is resumed. At the end of the interval the receiver MUST discard those retained sequences. The next advertisement for that source is then a new baseline, and its sequence number is stored even when the counter has started over.
+
+A source that returns during the retention interval and still has the last sequence number it sent MUST continue from that number. A source that starts the counter over MUST wait until the retention interval has passed before it sends the new sequence. A receiver that has already discarded the retained sequence accepts that advertisement.
 
 The entry carries the track hashes, the subscribe parameters, and the namespace and track-name octets. The octets let the origin relay construct the {{MOQT}} subscribe toward the publisher. Other relays can forward the entry without interpreting the name. A receiver MUST recompute the hashes from the name octets and MUST treat a mismatch as a malformed message.
 
@@ -336,7 +354,7 @@ Policy MAY filter subscribe advertisements the way it filters announces. An orig
 
 On receipt, the origin relay compares the subscribe with the announce information base. Tuple hashes are compared in order. A shorter namespace matches when each of its tuples equals the corresponding tuple of the longer name. An exact track match uses the full-name hash. A match causes the origin relay to subscribe toward the publisher, if it has not already, and to build a subscriber node set toward the source node of the subscribe.
 
-A withdrawal removes the entry and updates the forwarding information base. The source node sends the withdrawal when its local subscribers for that track are gone.
+A withdrawal removes the entry and updates the forwarding information base. The receiver keeps the sequence number for the retention rules in {{subscribe-ib}}. The source node sends the withdrawal when its local subscribers for that track are gone.
 
 ## Forwarding Information Base
 
@@ -344,9 +362,9 @@ The forwarding information base is local. It is not encoded as an information-ba
 
 For each remote Node ID the node keeps the peering session that path selection chose. For each object flow the node keeps the mapping from an ingress subscriber-node-set identifier to the egress session and the egress identifier. A local subscriber is represented by a zero session identifier and a zero set identifier, which means the object is delivered to the {{MOQT}} stack on this node.
 
-The table is updated when a node advertisement changes the best session, when a subscribe is added or removed, and when a subscriber node set arrives. An object stream that is already open keeps its previous egress until that stream ends. A new stream, and every datagram, uses the session currently in the table.
+The table is updated when a node advertisement changes the best session, when a subscribe is added or removed, and when a subscriber node set arrives. An object stream that is already open keeps its previous egress until that stream ends. A new stream, and every datagram, uses the session currently in the table. {{path-change}} states when forwarding stops.
 
-## Subscriber Node Set
+## Subscriber Node Set {#sns}
 
 The subscriber node set is the data-plane description of who needs a flow. It lists subscriber-relay Node IDs. It does not list the hops between them. Each hop looks those Node IDs up in the node information base and chooses the next data session.
 
@@ -378,6 +396,10 @@ hash_combine(full_name_hash, name_hash)
 {: title="Full-name hash" }
 
 Prefix matching uses the CityHash64 of each tuple, compared in order. A namespace A is a prefix of namespace B when A has no more tuples than B and each tuple hash of A equals the tuple hash of B at the same index.
+
+CityHash64 has a 64-bit output, so distinct names can share a hash. Recomputing a hash from the octets in the same message and comparing it with the hash field detects a malformed message. Two different names that produce one hash stay one forwarding key.
+
+The forwarding identity of a track is its full-name hash. Announce entries, subscribe entries, and object delivery match on that hash. Prefix matching matches on tuple hashes. Two different octet strings with the same hash are the same key. A node MUST keep one entry for that hash and MUST handle the announces, subscribes, and objects under it as one track. The name octets travel with announce and subscribe messages so an endpoint can rebuild the {{MOQT}} name. Forwarding does not use those octets as a second identity.
 
 # Connection Establishment
 
@@ -434,7 +456,7 @@ Initiator                         Acceptor
 
 For each Node ID, the node compares the candidates advertised by its sessions. The first of these tests that differs chooses the candidate:
 
-1. Lower selection cost. The cost is the sum of metrics. When the next-hop session is configured with a metric greater than the local node metric, the difference is added.
+1. Lower selection cost. The cost is the sum of metrics carried in the advertisement, plus `max(0, S - M)` for the session that would be the next hop. `M` is the selecting node's metric and `S` is the metric configured on that next-hop session. Each metric inside the sum is the advertised cost written by the node that sent that hop, the greater of that node's metric and the session metric it used. When `S` is lower than or equal to `M`, the added term is zero.
 2. Fewer path items.
 3. Lower sum of smoothed round-trip times.
 
@@ -490,22 +512,25 @@ When the origin relay has both a publisher and at least one matching subscribe, 
 
 A later subscribe that uses an existing session is added to the existing set, under the same identifier. A subscribe that is the last one on a session withdraws the identifier.
 
+## Path Changes and Stopped Flows {#path-change}
+
+An open object stream stays on the egress session that accepted it. A datagram and a new stream use the session path selection has chosen now. The node does not open a replacement stream for bytes already in flight. The next {{MOQT}} group or subgroup is a new stream and takes the new path.
+
+Forwarding of new objects toward a subscriber stops when that subscriber is removed from the set, when its subscribe is withdrawn, or when the egress session is no longer the selected next hop. If that egress has no open stream for the flow, the node drops the egress at once. When the set no longer names any subscriber on that session, the node withdraws the subscriber node set identifier there. If the egress still has an open stream, the node marks the egress draining. Bytes that continue that stream are still written. A datagram or a new stream skips a draining egress. When the stream ends, the node drops the egress and withdraws the set identifier if no subscriber remains on it.
+
+A subscriber node set withdrawal retires that identifier. The receiver stops forwarding new objects for it, finishes the streams it opened for that set, and discards objects it was holding for the identifier. An identifier that has been withdrawn, or that was never advertised on the session, is stale. The receiver MUST discard objects that cite a stale identifier, and it MUST NOT create an egress for one. Objects that arrive before the first advertisement of an identifier are the case in {{sns}}: they are held, and they are discarded if the session ends or the identifier is withdrawn first.
+
+If the egress session fails before a draining stream ends, the stream ends with the session. The node removes that egress and every set identifier learned on the session. It does not rebuild the interrupted stream. A later new stream uses a session that path selection still considers available.
+
 # Message Encoding
 
 Octets are sent in network byte order. Unless a field states otherwise, multi-byte integers are unsigned and big-endian. A binary64 value is the IEEE 754 encoding of that floating-point number, also big-endian.
 
-Diagrams name a field and the size in octets. `varint` is the variable-length integer defined in this section. A field in brackets is present only when the condition in the text is met. A repeated field continues until the enclosing message length is exhausted, unless a count is given.
+Diagrams name a field and the size in octets. `varint` is the variable-length integer defined in {{varint}}. A field in brackets is present only when the condition in the text is met. A repeated field continues until the enclosing message length is exhausted, unless a count is given.
 
 ## Variable-Length Integers {#varint}
 
-Contact lengths use a variable-length integer of one to nine octets. The shortest encoding MUST be used. Let `bit_width(v)` be zero when `v` is zero, and otherwise one plus the index of the highest set bit.
-
-* If `v` is zero, the length `L` is 1. Otherwise `L` is the minimum of 9 and `floor((bit_width(v) + 6) / 7)`.
-* When `L` is 9, the encoding is the octet `0xFF` followed by `v` as eight octets.
-* When `L` is 1, the encoding is the single octet `v`. Values 0 through 127 use this form.
-* Otherwise the encoding is `L` octets. Write `v` into the most significant `L` octets of a 64-bit big-endian integer, which is `v` shifted left by `(8 - L) * 8`. Then set the high `(L - 1)` bits of the first octet by OR with the low eight bits of `0xFF << (9 - L)`.
-
-A decoder reads the run of leading one bits in the first octet. Eight leading ones mean a nine-octet encoding and a 64-bit value in the following eight octets. `N` leading ones for `N` from 0 through 7 mean a length of `N + 1`. The value is the low `(8 - L)` bits of the first octet followed by the remaining `L - 1` octets. An encoding that is not the shortest form, or that sets a bit the encoder leaves clear, MUST be rejected.
+A varint MUST use the variable-length integer encoding in {{MOQT, Section 8.1}}. The number of leading 1 bits in the first octet gives the length. An encoding is one to nine octets and represents an unsigned integer of up to 64 bits. A sender MAY use any encoding length that can represent the value. A receiver MUST accept any such encoding.
 
 ## Common Header
 
@@ -541,7 +566,7 @@ Message Length is the number of octets after the header. It does not include the
 | 11   | SUBSCRIBE_NODE_SET_WD  | Data session, or Both session       |
 {: title="Control message types" }
 
-An unknown type is a connection error.
+Message type 0, message type 3, and any type that is not assigned in the table are unknown. An unknown type is a connection error, application error INVALID_CTRL_MSG_TYPE.
 
 ## Node Information {#node-info}
 
@@ -567,7 +592,7 @@ Path Item {
 ~~~
 {: title="Node information" }
 
-Node Type is a value from {{node-types}}. Contact Length is a {{varint}} count of the following octets.
+Node Type is a value from {{node-types}}. Any other value is malformed. An unknown type in CONNECT is rejected with response code Connect Error, and the acceptor then closes the connection. An unknown type in CONNECT_RESPONSE makes the initiator close the connection, and no information-base state is created. An unknown type in a node advertisement or withdrawal is a connection error, application error INVALID_ENCODING. Contact Length is a {{varint}} count of the following octets.
 
 ## CONNECT
 
@@ -585,7 +610,7 @@ CONNECT Message {
 ~~~
 {: title="CONNECT" }
 
-Peer Mode is a value from the session mode table. Token Present is 1 when a token follows and 0 when mutual TLS alone is used. Any other value is a malformed message. Token Length is a {{varint}} count of the following token octets. The token is opaque. Node Info describes the initiator and has an empty path. The token fields come before Node Info so the node path can still occupy the remainder of the message.
+Peer Mode is a value from the session mode table. Any other value is rejected with response code Peering Mode Not Allowed, and the acceptor then closes the connection. Token Present is 1 when a token follows and 0 when mutual TLS alone is used. Any other value is a malformed message. Token Length is a {{varint}} count of the following token octets. The token is opaque. Node Info describes the initiator and has an empty path. The token fields come before Node Info so the node path can still occupy the remainder of the message.
 
 ## CONNECT_RESPONSE
 
@@ -664,7 +689,7 @@ SUBSCRIBE_INFO_WD Message {
 ~~~
 {: title="Subscribe information messages" }
 
-Sequence is the source node's counter for this subscribe. Source Node ID is the subscriber relay. The three hashes are defined in {{names}}. Priority is the subscriber's priority. Delivery Timeout and Expires are milliseconds. Zero means the parameter is unset. Forward is zero to pause forwarding and non-zero to forward. New Group Present is 1 when New Group Request ID follows and 0 when it does not. Any other value is a malformed message.
+Sequence is the delayed-update counter for this subscribe entry, as defined in {{subscribe-ib}}. Source Node ID is the subscriber relay. The three hashes are defined in {{names}}. Priority is the subscriber's priority. Delivery Timeout and Expires are milliseconds. Zero means the parameter is unset. Forward is zero to pause forwarding and non-zero to forward. New Group Present is 1 when New Group Request ID follows and 0 when it does not. Any other value is a malformed message.
 
 ~~~
 Track Name {
@@ -676,11 +701,11 @@ Track Name {
   Name Octets (..),
 }
 ~~~
-{: title="Track name" }
+{: #track-name title="Track name" }
 
-Tuple Count is the number of namespace tuples. Each tuple is a 16-bit length and that many octets. Name Length is a 16-bit length. Zero means the name is empty. Tuple Count and the lengths MUST fit in the message. A count or length that runs past Message Length is a malformed message.
+Tuple Count is the number of namespace tuples. Each tuple is a 16-bit length and that many octets. Name Length is a 16-bit length of Name Octets. Zero means those octets are empty. Tuple Count and the lengths MUST fit in the message. A count or length that runs past Message Length is a malformed message. Subscribe and announce messages use this same structure.
 
-## Announce Information
+## Announce Information {#announce-info}
 
 ~~~
 ANNOUNCE_INFO_ADV Message {
@@ -701,7 +726,13 @@ ANNOUNCE_INFO_WD Message {
 ~~~
 {: title="Announce information messages" }
 
-Source Node ID is the origin relay. Bit 0 of Flags is 0 for a single track and 1 for a namespace announcement. A namespace announcement has an empty track name. All other flag bits MUST be sent as zero and MUST be ignored on receipt.
+Source Node ID is the origin relay. Track Name is the structure in {{track-name}}. It carries the namespace tuples and the track-name octets for an advertisement and for a withdrawal. Full Name Hash is the full-name hash defined in {{names}}. The message does not carry the namespace hash or the name hash. The receiver derives both from Track Name.
+
+Bit 0 of Flags selects the kind. Zero is a single track. One is a namespace. All other flag bits MUST be sent as zero and MUST be ignored on receipt.
+
+A track announcement uses Name Octets as the track name. Name Length MAY be zero, and the announcement is still a track. A namespace announcement covers the tracks in the namespace given by the tuples. Its Name Length MUST be zero, and Name Octets MUST be empty. A namespace announcement with a non-zero Name Length is a malformed message.
+
+The receiver MUST recompute the full-name hash from Track Name and MUST treat a mismatch with Full Name Hash as a malformed message. The namespace hash is CityHash64 of the concatenated tuple octets. The name hash is CityHash64 of Name Octets, which is the hash of zero octets when Name Length is zero. The full-name hash combines those two values as in {{names}}. The same check applies to a track announcement, a namespace announcement, an advertisement, and a withdrawal.
 
 ## Subscriber Node Set
 
@@ -741,7 +772,7 @@ Data Header {
 | Type | Name             | Header length | Use |
 |-----:|:-----------------|--------------:|:----|
 | 0    | DATAGRAM         | 14            | One datagram object. |
-| 1    | EXISTING_STREAM  | 0             | Not encoded. Bytes after a new-stream header have no peering header. |
+| 1    | EXISTING_STREAM  | none          | Not a wire value. A received header with this type is an error. |
 | 2    | NEW_STREAM       | 19            | First bytes of a unidirectional stream. |
 {: title="Data types" }
 
@@ -781,7 +812,7 @@ Priority is the QUIC priority of the egress streams created from this stream. TT
 
 ### Existing Stream Bytes
 
-After NEW_STREAM, further payload on the same QUIC stream is sent with no peering header. The SNS ID, full-name hash, priority, and time-to-live stay those of the NEW_STREAM header that opened the stream. An implementation classifies those bytes as existing-stream data locally. It does not put Data Type 1 on the wire.
+After NEW_STREAM, further payload on the same QUIC stream is sent with no peering header. The SNS ID, full-name hash, priority, and time-to-live stay those of the NEW_STREAM header that opened the stream. An implementation classifies those bytes as existing-stream data locally. It does not put Data Type 1 on the wire. A stream whose first header has a Data Type other than 2, including type 1, is reset with application error INVALID_START_OF_STREAM. A datagram whose Data Type is not 0 is discarded.
 
 # Error Handling
 
@@ -800,7 +831,7 @@ Transport failures and protocol violations close the QUIC connection or reset th
 | 128  | SWITCH_NEW_STREAM       | Stream | The acceptor reset the previous control stream. |
 {: title="QUIC application error codes" }
 
-A CONNECT_RESPONSE with a non-zero response code refuses the session. The acceptor closes the connection after sending it. Response code 2 corresponds to a peer that completed mutual TLS and then failed token authentication, token authorization, or the Node ID policy. A TLS failure does not produce CONNECT_RESPONSE, because CONNECT is not sent when the handshake fails.
+A CONNECT_RESPONSE with a non-zero response code refuses the session. An unknown response code is a refusal as well. The initiator closes the connection and creates no information-base state. The acceptor closes the connection after sending a non-zero code. Response code 2 corresponds to a peer that completed mutual TLS and then failed token authentication, token authorization, or the Node ID policy. A TLS failure does not produce CONNECT_RESPONSE, because CONNECT is not sent when the handshake fails.
 
 # Operational Considerations
 
@@ -819,6 +850,8 @@ Mutual TLS, as specified in {{authentication}}, authenticates every peering sess
 The certificate checks in {{authentication}} exclude expired credentials, weak public keys, and MD5 or SHA-1 signatures. Trust anchors and any explicitly trusted self-signed certificates are deployment configuration. A self-signed certificate used beyond a closed domain will not be accepted by a peer that requires a chain to a known anchor.
 
 The authenticated identity is bound to the Node ID in CONNECT. Without that binding, a peer that holds a valid certificate could advertise a Node ID it does not own and attract object flows. Policy at the acceptor enforces the binding and returns Not Authorized when it fails.
+
+The name hashes in {{names}} are 64-bit CityHash64 forwarding keys. A collision merges two names into one peering track, so objects for one name can be delivered on the subscribe state of the other. A peer that is allowed to choose track names can attempt that collision. The hash check on a subscribe or an announce accepts the message when the hash field matches the octets in that same message. A second name that hashes to a key already in use joins that same track.
 
 Control peering distributes the names of tracks and the identities of the relays that publish or subscribe. Filtering announce and subscribe advertisements is the mechanism that keeps a track inside a region or a customer boundary. A missing filter is a data leak, because an origin relay that learns a subscribe will forward objects toward that subscriber relay.
 
