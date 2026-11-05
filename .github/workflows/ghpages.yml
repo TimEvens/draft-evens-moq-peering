@@ -1,0 +1,76 @@
+name: "Update Editor's Copy"
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - README.md
+      - CONTRIBUTING.md
+      - LICENSE.md
+      - .gitignore
+
+jobs:
+  build:
+    name: "Update Editor's Copy"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - name: "Checkout"
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: "Setup"
+      id: setup
+      run: date -u "+date=%FT%T" >>"$GITHUB_OUTPUT"
+
+    - name: "Caching"
+      uses: actions/cache@v4
+      with:
+        path: |
+          .refcache
+          .venv
+          .gems
+          node_modules
+          .targets.mk
+        key: i-d-${{ steps.setup.outputs.date }}
+        restore-keys: i-d-
+
+    - name: "Build HTML"
+      uses: martinthomson/i-d-template@v1
+      with:
+        make: html
+        token: ${{ github.token }}
+
+    - name: "Ensure gh-pages branch"
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+          exit 0
+        fi
+        tmp=$(mktemp -d)
+        git clone -n . "$tmp"
+        git -C "$tmp" checkout -q --orphan gh-pages
+        git -C "$tmp" rm -rfq .
+        printf '%s\n' '/deps/' '/node_modules/' '/package-lock.json' '/.requirements.txt' '/Gemfile.lock' > "$tmp/.gitignore"
+        : > "$tmp/index.html"
+        : > "$tmp/archive.json"
+        git -C "$tmp" add .gitignore index.html archive.json
+        git -C "$tmp" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Automatic setup of gh-pages."
+        git -C "$tmp" push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:gh-pages
+
+    - name: "Update GitHub Pages"
+      uses: martinthomson/i-d-template@v1
+      with:
+        make: gh-pages
+        token: ${{ github.token }}
+
+    - name: "Archive Built Drafts"
+      uses: actions/upload-artifact@v4
+      with:
+        path: |
+          draft-*.html
+          draft-*.txt
