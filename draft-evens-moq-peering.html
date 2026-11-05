@@ -16,17 +16,17 @@
 <meta content="draft-evens-moq-peering-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.35.0
-    Python 3.14.4
+    Python 3.14.10
     ConfigArgParse 1.9.0
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
-    lxml 6.1.3
+    lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.14.5
-    pycountry 26.2.16
+    platformdirs 4.14.3
+    pycountry 24.6.1
     PyYAML 6.0.3
-    requests 2.34.2
+    requests 2.33.1
     wcwidth 0.9.4
 -->
 <link href="draft-evens-moq-peering.xml" rel="alternate" type="application/rfc+xml">
@@ -1030,7 +1030,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Evens</td>
-<td class="center">Expires 8 May 2027</td>
+<td class="center">Expires 9 May 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1043,12 +1043,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-evens-moq-peering-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-11-04" class="published">4 November 2026</time>
+<time datetime="2026-11-05" class="published">5 November 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-05-08">8 May 2027</time></dd>
+<dd class="expires"><time datetime="2027-05-09">9 May 2027</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -1098,7 +1098,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 8 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 9 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1155,6 +1155,9 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
                 <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-topologies" class="internal xref">Topologies</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4">
+                <p id="section-toc.1-1.3.2.4.1"><a href="#section-3.4" class="auto internal xref">3.4</a>.  <a href="#name-end-to-end-example" class="internal xref">End-to-End Example</a></p>
 </li>
             </ul>
 </li>
@@ -1237,6 +1240,9 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
                 <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-opening-a-flow" class="internal xref">Opening a Flow</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3">
+                <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="auto internal xref">9.3</a>.  <a href="#name-path-changes-and-stopped-fl" class="internal xref">Path Changes and Stopped Flows</a></p>
 </li>
             </ul>
 </li>
@@ -1554,7 +1560,7 @@ Publisher --&gt; Origin Edge --+--&gt; Subscriber Edge --&gt; Subscriber
                             +--&gt; Subscriber Edge --&gt; Subscriber
 </pre><a href="#section-3.3-2" class="pilcrow">¶</a>
 </div>
-<p id="section-3.3-3">When several subscriber Edges share a region, or when the direct path is not allowed, the origin Edge forwards to a Via. The Via splits the same objects toward the subscriber Edges. Further Via hops <span class="bcp14">MAY</span> be added to steer the network path. Via nodes can be added or removed for a track without resetting the publisher's <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> session. An object stream already open on the previous hop drains there. A new stream and every datagram use the new hop.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
+<p id="section-3.3-3">When several subscriber Edges share a region, or when the direct path is not allowed, the origin Edge forwards to a Via. The Via splits the same objects toward the subscriber Edges. Further Via hops <span class="bcp14">MAY</span> be added to steer the network path. Via nodes can be added or removed for a track without resetting the publisher's <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> session. An object stream already open on the previous hop drains there, as specified in <a href="#path-change" class="auto internal xref">Section 9.3</a>. A new stream and every datagram use the new hop.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
 <div class="alignCenter art-text artwork" id="section-3.3-4">
 <pre>
 Publisher --&gt; Origin Edge --&gt; Via --&gt; Subscriber Edge --&gt; Subscriber
@@ -1562,6 +1568,31 @@ Publisher --&gt; Origin Edge --&gt; Via --&gt; Subscriber Edge --&gt; Subscriber
                                 +----&gt; Subscriber Edge --&gt; Subscriber
 </pre><a href="#section-3.3-4" class="pilcrow">¶</a>
 </div>
+</section>
+</div>
+<div id="end-to-end-example">
+<section id="section-3.4">
+        <h3 id="name-end-to-end-example">
+<a href="#section-3.4" class="section-number selfRef">3.4. </a><a href="#name-end-to-end-example" class="section-name selfRef">End-to-End Example</a>
+        </h3>
+<p id="section-3.4-1">A publisher and a subscriber meet through two Edges. A Stub, when one is present, is hidden behind its parent Edge.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-3.4-2">
+<li id="section-3.4-2.1">
+            <p id="section-3.4-2.1.1">The publisher announces at an Edge, or at a Stub. The Edge that owns the publisher originates an announce whose source Node ID is that Edge. A Stub's parent uses its own Node ID, so the rest of the network does not see the Stub. Control peering floods the announce.<a href="#section-3.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-3.4-2.2">
+            <p id="section-3.4-2.2.1">The subscriber subscribes at an Edge, or at a Stub. That Edge originates one subscribe for the track, again under its own Node ID. Many local clients, including clients of a Stub, collapse to that one subscribe. Control peering carries it toward the origin Edge.<a href="#section-3.4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-3.4-2.3">
+            <p id="section-3.4-2.3.1">The origin Edge matches the subscribe to the announce by the namespace and the full-name hash. It selects a data session toward the subscriber Edge. The session may be direct or may pass through one or more Via nodes.<a href="#section-3.4-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-3.4-2.4">
+            <p id="section-3.4-2.4.1">The origin creates a subscriber node set on that data session. The set lists the subscriber Edge. Each hop that receives the set chooses its own next data session and advertises the subset of Node IDs that use that session.<a href="#section-3.4-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-3.4-2.5">
+            <p id="section-3.4-2.5.1">Objects follow those data sessions. The header names the set identifier and the full-name hash. The subscriber Edge removes the peering header and delivers the objects to its local subscriber, or to the Stub on the combined session the Stub opened.<a href="#section-3.4-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
 </section>
 </div>
 </section>
@@ -1579,7 +1610,8 @@ Publisher --&gt; Origin Edge --&gt; Via --&gt; Subscriber Edge --&gt; Subscriber
 <p id="section-4.1-1">Control peering exchanges the node, announce, and subscribe information bases. It is always on. A node that participates in those bases keeps a control session up to each control peer for as long as that peering relationship exists. The control session does not follow the path objects take. A small set of control sessions, including a redundant session for availability, can serve many data sessions.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 <p id="section-4.1-2">There is one control relationship between two nodes. If both nodes open a session in mode Control or mode Both, the session initiated by the node with the lower Node ID is the control session. The other endpoint closes the extra control session. Data sessions are not limited by this rule.<a href="#section-4.1-2" class="pilcrow">¶</a></p>
 <p id="section-4.1-3">When a control session ends, each side removes node, announce, and subscribe state learned only through that session and selects paths again. Object state that belongs to a data session is removed when that data session ends.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
-<p id="section-4.1-4">The initiator of a session opens one bidirectional QUIC stream and sends every control message on it. CONNECT is the first message. The acceptor latches onto that stream and sends CONNECT_RESPONSE and later control messages on it. The initiator <span class="bcp14">MAY</span> open a replacement bidirectional stream. The acceptor adopts the new stream when a control message arrives on it and resets the previous control stream if that stream is still open. Two control streams are not in use at once.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.1-4">The initiator of a session opens one bidirectional QUIC stream and sends every control message on it. CONNECT is the first message. The acceptor does not open a bidirectional stream. It latches onto the initiator's stream and sends CONNECT_RESPONSE and later control messages on it.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.1-5">The initiator <span class="bcp14">MAY</span> open a replacement bidirectional stream. The acceptor keeps using the current control stream until a complete, well-formed control message arrives on the new stream. That message adopts the new stream as the control stream. The acceptor then resets the previous control stream with application error SWITCH_NEW_STREAM when that stream is still open. A new stream whose first complete message is malformed is reset, and the current control stream stays in use. Two control streams are not in use at once. A bidirectional stream that arrives at the initiator, which did not open it, is reset. The initiator continues to use the stream it opened.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="data-peering">
@@ -1841,7 +1873,7 @@ Publisher --&gt; Origin Edge --&gt; Via --&gt; Subscriber Edge --&gt; Subscriber
             <dd class="break"></dd>
 <dt id="section-5.1.2-2.9">Metric:</dt>
             <dd style="margin-left: 1.5em" id="section-5.1.2-2.10">
-              <p id="section-5.1.2-2.10.1">An unsigned 64-bit cost. Lower sums are preferred. The default is 100. A peering session that is configured with a higher cost advertises that higher cost in place of the node metric on that session only.<a href="#section-5.1.2-2.10.1" class="pilcrow">¶</a></p>
+              <p id="section-5.1.2-2.10.1">An unsigned 64-bit cost. Lower sums are preferred. The default node metric is 100. Let <code>M</code> be the node metric and <code>S</code> the metric configured for one peering session. The cost advertised on that session, in a self-advertisement and in a path item this node appends, is <code>max(M, S)</code>. A session metric lower than or equal to <code>M</code> leaves the advertised cost equal to <code>M</code>.<a href="#section-5.1.2-2.10.1" class="pilcrow">¶</a></p>
 </dd>
             <dd class="break"></dd>
 <dt id="section-5.1.2-2.11">Path:</dt>
@@ -1900,22 +1932,25 @@ Publisher --&gt; Origin Edge --&gt; Via --&gt; Subscriber Edge --&gt; Subscriber
 <a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-announce-information-base" class="section-name selfRef">Announce Information Base</a>
         </h3>
 <p id="section-5.2-1">The announce information base records namespaces and tracks that publishers have announced. An Edge or Stub originates an entry when a local publisher announces. The source Node ID is the Edge that owns the publisher. A Stub's parent uses its own Node ID.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
-<p id="section-5.2-2">An entry is either a single track or a namespace that covers many tracks. Namespace entries omit the track name. Receivers index entries by the full-name hash and by successive namespace-tuple hashes so a later subscribe can find a matching announce.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
+<p id="section-5.2-2">An entry is either a single track or a namespace that covers many tracks. Both kinds carry the namespace tuples. A namespace entry has an empty track name. Receivers index entries by the full-name hash and by successive namespace-tuple hashes so a later subscribe can find a matching announce. The full-name hash is checked against those octets as defined in <a href="#announce-info" class="auto internal xref">Section 10.9</a>.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
 <p id="section-5.2-3">Announce state is flooded on control peering, subject to policy. A relay <span class="bcp14">MAY</span> drop an announcement on input or on output. A subscriber relay uses the entries it keeps to answer a <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> subscriber and to learn publisher parameters that were conveyed by the local <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> stack. Relays that only forward peering messages use the hash and the source Node ID.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
 <p id="section-5.2-4">A withdrawal is sent when the publisher unannounces. The withdrawal is propagated on control peering the same way as the advertisement. Duplicate advertisements for the same source and full-name hash are not forwarded again.<a href="#section-5.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="subscribe-information-base">
+<div id="subscribe-ib">
 <section id="section-5.3">
         <h3 id="name-subscribe-information-base">
 <a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-subscribe-information-base" class="section-name selfRef">Subscribe Information Base</a>
         </h3>
-<p id="section-5.3-1">The subscribe information base records active subscribes. The subscriber relay originates an entry when it accepts a <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> subscribe, or when its Stub child sends one. The source Node ID is that Edge. One entry represents the subscriber relay, not each local client. Many clients on one Edge collapse to one peering subscribe per track.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
-<p id="section-5.3-2">Each advertisement and withdrawal from the source node carries a 16-bit sequence number. The source node increments it by one for that subscribe, wrapping from 65535 to 0. Intermediate nodes forward the sequence unchanged. A received sequence is newer when the unsigned 16-bit distance <code>(received - stored) mod 65536</code> is in the range 1 through 32767. An equal sequence, and a distance of 32768 through 65535, is not newer and <span class="bcp14">MUST</span> be ignored. This keeps a withdrawal and a following advertisement ordered when propagation reorders them.<a href="#section-5.3-2" class="pilcrow">¶</a></p>
-<p id="section-5.3-3">The entry carries the track hashes, the subscribe parameters, and the namespace and track-name octets. The octets let the origin relay construct the <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> subscribe toward the publisher. Other relays can forward the entry without interpreting the name. A receiver <span class="bcp14">MUST</span> recompute the hashes from the name octets and <span class="bcp14">MUST</span> treat a mismatch as a malformed message.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
-<p id="section-5.3-4">Policy <span class="bcp14">MAY</span> filter subscribe advertisements the way it filters announces. An origin relay that never receives a subscribe does not forward objects for it. That is how a deployment keeps a publisher inside a region or a service class.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
-<p id="section-5.3-5">On receipt, the origin relay compares the subscribe with the announce information base. Tuple hashes are compared in order. A shorter namespace matches when each of its tuples equals the corresponding tuple of the longer name. An exact track match uses the full-name hash. A match causes the origin relay to subscribe toward the publisher, if it has not already, and to build a subscriber node set toward the source node of the subscribe.<a href="#section-5.3-5" class="pilcrow">¶</a></p>
-<p id="section-5.3-6">A withdrawal removes the entry and updates the forwarding information base. The source node sends the withdrawal when its local subscribers for that track are gone.<a href="#section-5.3-6" class="pilcrow">¶</a></p>
+<p id="section-5.3-1">The subscribe information base records active subscribes. The subscriber relay originates an entry when it accepts a <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> subscribe, or when its Stub child sends one. The source Node ID is that Edge. One entry represents the subscriber relay, not each local client. Many clients on one Edge collapse to one peering subscribe per track. Different subscribe parameters do not create another entry. A later update replaces the parameters of that same entry.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<p id="section-5.3-2">Each advertisement and withdrawal of an entry carries a 16-bit sequence number. The sequence number is used only to detect a delayed update. It is not part of the entry identity. The entry identity is the source Node ID and the track. The source node increments the sequence number by one for each update of that entry, wrapping from 65535 to 0. Intermediate nodes forward the sequence unchanged.<a href="#section-5.3-2" class="pilcrow">¶</a></p>
+<p id="section-5.3-3">A receiver stores the greatest sequence number it has accepted for that source and track. Withdrawing the entry removes the subscribe and updates the forwarding information base, and the receiver keeps that sequence number while the source is still reachable. A later advertisement or withdrawal is accepted only when its sequence number is greater. When a message arrives with a lower sequence number, that message is a delayed update and <span class="bcp14">MUST</span> be ignored, because a greater sequence number was already received. An equal sequence number <span class="bcp14">MUST</span> be ignored. This stops a delayed advertisement from restoring a subscribe that was withdrawn. The comparison uses the unsigned distance <code>(received - stored) mod 65536</code>. A distance of 1 through 32767 means the received sequence is greater, so after the counter wraps, 0 is greater than 65535. A distance of 32768 through 65535 means the received sequence is lower.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<p id="section-5.3-4">When the source Node ID is removed from the node information base, the receiver starts a retention interval for the sequence numbers of that source. The interval is 30 seconds and is not negotiated. While it runs, the retained sequences stay in force, so a source that returns and continues its counter is resumed. At the end of the interval the receiver <span class="bcp14">MUST</span> discard those retained sequences. The next advertisement for that source is then a new baseline, and its sequence number is stored even when the counter has started over.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
+<p id="section-5.3-5">A source that returns during the retention interval and still has the last sequence number it sent <span class="bcp14">MUST</span> continue from that number. A source that starts the counter over <span class="bcp14">MUST</span> wait until the retention interval has passed before it sends the new sequence. A receiver that has already discarded the retained sequence accepts that advertisement.<a href="#section-5.3-5" class="pilcrow">¶</a></p>
+<p id="section-5.3-6">The entry carries the track hashes, the subscribe parameters, and the namespace and track-name octets. The octets let the origin relay construct the <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> subscribe toward the publisher. Other relays can forward the entry without interpreting the name. A receiver <span class="bcp14">MUST</span> recompute the hashes from the name octets and <span class="bcp14">MUST</span> treat a mismatch as a malformed message.<a href="#section-5.3-6" class="pilcrow">¶</a></p>
+<p id="section-5.3-7">Policy <span class="bcp14">MAY</span> filter subscribe advertisements the way it filters announces. An origin relay that never receives a subscribe does not forward objects for it. That is how a deployment keeps a publisher inside a region or a service class.<a href="#section-5.3-7" class="pilcrow">¶</a></p>
+<p id="section-5.3-8">On receipt, the origin relay compares the subscribe with the announce information base. Tuple hashes are compared in order. A shorter namespace matches when each of its tuples equals the corresponding tuple of the longer name. An exact track match uses the full-name hash. A match causes the origin relay to subscribe toward the publisher, if it has not already, and to build a subscriber node set toward the source node of the subscribe.<a href="#section-5.3-8" class="pilcrow">¶</a></p>
+<p id="section-5.3-9">A withdrawal removes the entry and updates the forwarding information base. The receiver keeps the sequence number for the retention rules in <a href="#subscribe-ib" class="auto internal xref">Section 5.3</a>. The source node sends the withdrawal when its local subscribers for that track are gone.<a href="#section-5.3-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="forwarding-information-base">
@@ -1925,10 +1960,10 @@ Publisher --&gt; Origin Edge --&gt; Via --&gt; Subscriber Edge --&gt; Subscriber
         </h3>
 <p id="section-5.4-1">The forwarding information base is local. It is not encoded as an information-base message.<a href="#section-5.4-1" class="pilcrow">¶</a></p>
 <p id="section-5.4-2">For each remote Node ID the node keeps the peering session that path selection chose. For each object flow the node keeps the mapping from an ingress subscriber-node-set identifier to the egress session and the egress identifier. A local subscriber is represented by a zero session identifier and a zero set identifier, which means the object is delivered to the <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> stack on this node.<a href="#section-5.4-2" class="pilcrow">¶</a></p>
-<p id="section-5.4-3">The table is updated when a node advertisement changes the best session, when a subscribe is added or removed, and when a subscriber node set arrives. An object stream that is already open keeps its previous egress until that stream ends. A new stream, and every datagram, uses the session currently in the table.<a href="#section-5.4-3" class="pilcrow">¶</a></p>
+<p id="section-5.4-3">The table is updated when a node advertisement changes the best session, when a subscribe is added or removed, and when a subscriber node set arrives. An object stream that is already open keeps its previous egress until that stream ends. A new stream, and every datagram, uses the session currently in the table. <a href="#path-change" class="auto internal xref">Section 9.3</a> states when forwarding stops.<a href="#section-5.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="subscriber-node-set">
+<div id="sns">
 <section id="section-5.5">
         <h3 id="name-subscriber-node-set">
 <a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-subscriber-node-set" class="section-name selfRef">Subscriber Node Set</a>
@@ -1966,6 +2001,8 @@ hash_combine(full_name_hash, name_hash)
 <a href="#name-full-name-hash" class="selfRef">Full-name hash</a>
         </figcaption></figure>
 <p id="section-6-5">Prefix matching uses the CityHash64 of each tuple, compared in order. A namespace A is a prefix of namespace B when A has no more tuples than B and each tuple hash of A equals the tuple hash of B at the same index.<a href="#section-6-5" class="pilcrow">¶</a></p>
+<p id="section-6-6">CityHash64 has a 64-bit output, so distinct names can share a hash. Recomputing a hash from the octets in the same message and comparing it with the hash field detects a malformed message. Two different names that produce one hash stay one forwarding key.<a href="#section-6-6" class="pilcrow">¶</a></p>
+<p id="section-6-7">The forwarding identity of a track is its full-name hash. Announce entries, subscribe entries, and object delivery match on that hash. Prefix matching matches on tuple hashes. Two different octet strings with the same hash are the same key. A node <span class="bcp14">MUST</span> keep one entry for that hash and <span class="bcp14">MUST</span> handle the announces, subscribes, and objects under it as one track. The name octets travel with announce and subscribe messages so an endpoint can rebuild the <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> name. Forwarding does not use those octets as a second identity.<a href="#section-6-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="connection-establishment">
@@ -2060,7 +2097,7 @@ Initiator                         Acceptor
 <p id="section-8-1">For each Node ID, the node compares the candidates advertised by its sessions. The first of these tests that differs chooses the candidate:<a href="#section-8-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-8-2">
 <li id="section-8-2.1">
-          <p id="section-8-2.1.1">Lower selection cost. The cost is the sum of metrics. When the next-hop session is configured with a metric greater than the local node metric, the difference is added.<a href="#section-8-2.1.1" class="pilcrow">¶</a></p>
+          <p id="section-8-2.1.1">Lower selection cost. The cost is the sum of metrics carried in the advertisement, plus <code>max(0, S - M)</code> for the session that would be the next hop. <code>M</code> is the selecting node's metric and <code>S</code> is the metric configured on that next-hop session. Each metric inside the sum is the advertised cost written by the node that sent that hop, the greater of that node's metric and the session metric it used. When <code>S</code> is lower than or equal to <code>M</code>, the added term is zero.<a href="#section-8-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-8-2.2">
           <p id="section-8-2.2.1">Fewer path items.<a href="#section-8-2.2.1" class="pilcrow">¶</a></p>
@@ -2131,6 +2168,17 @@ Subscribers                        Subscribers
 <p id="section-9.2-3">A later subscribe that uses an existing session is added to the existing set, under the same identifier. A subscribe that is the last one on a session withdraws the identifier.<a href="#section-9.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
+<div id="path-change">
+<section id="section-9.3">
+        <h3 id="name-path-changes-and-stopped-fl">
+<a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-path-changes-and-stopped-fl" class="section-name selfRef">Path Changes and Stopped Flows</a>
+        </h3>
+<p id="section-9.3-1">An open object stream stays on the egress session that accepted it. A datagram and a new stream use the session path selection has chosen now. The node does not open a replacement stream for bytes already in flight. The next <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> group or subgroup is a new stream and takes the new path.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
+<p id="section-9.3-2">Forwarding of new objects toward a subscriber stops when that subscriber is removed from the set, when its subscribe is withdrawn, or when the egress session is no longer the selected next hop. If that egress has no open stream for the flow, the node drops the egress at once. When the set no longer names any subscriber on that session, the node withdraws the subscriber node set identifier there. If the egress still has an open stream, the node marks the egress draining. Bytes that continue that stream are still written. A datagram or a new stream skips a draining egress. When the stream ends, the node drops the egress and withdraws the set identifier if no subscriber remains on it.<a href="#section-9.3-2" class="pilcrow">¶</a></p>
+<p id="section-9.3-3">A subscriber node set withdrawal retires that identifier. The receiver stops forwarding new objects for it, finishes the streams it opened for that set, and discards objects it was holding for the identifier. An identifier that has been withdrawn, or that was never advertised on the session, is stale. The receiver <span class="bcp14">MUST</span> discard objects that cite a stale identifier, and it <span class="bcp14">MUST NOT</span> create an egress for one. Objects that arrive before the first advertisement of an identifier are the case in <a href="#sns" class="auto internal xref">Section 5.5</a>: they are held, and they are discarded if the session ends or the identifier is withdrawn first.<a href="#section-9.3-3" class="pilcrow">¶</a></p>
+<p id="section-9.3-4">If the egress session fails before a draining stream ends, the stream ends with the session. The node removes that egress and every set identifier learned on the session. It does not rebuild the interrupted stream. A later new stream uses a session that path selection still considers available.<a href="#section-9.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="message-encoding">
@@ -2139,28 +2187,13 @@ Subscribers                        Subscribers
 <a href="#section-10" class="section-number selfRef">10. </a><a href="#name-message-encoding" class="section-name selfRef">Message Encoding</a>
       </h2>
 <p id="section-10-1">Octets are sent in network byte order. Unless a field states otherwise, multi-byte integers are unsigned and big-endian. A binary64 value is the IEEE 754 encoding of that floating-point number, also big-endian.<a href="#section-10-1" class="pilcrow">¶</a></p>
-<p id="section-10-2">Diagrams name a field and the size in octets. <code>varint</code> is the variable-length integer defined in this section. A field in brackets is present only when the condition in the text is met. A repeated field continues until the enclosing message length is exhausted, unless a count is given.<a href="#section-10-2" class="pilcrow">¶</a></p>
+<p id="section-10-2">Diagrams name a field and the size in octets. <code>varint</code> is the variable-length integer defined in <a href="#varint" class="auto internal xref">Section 10.1</a>. A field in brackets is present only when the condition in the text is met. A repeated field continues until the enclosing message length is exhausted, unless a count is given.<a href="#section-10-2" class="pilcrow">¶</a></p>
 <div id="varint">
 <section id="section-10.1">
         <h3 id="name-variable-length-integers">
 <a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-variable-length-integers" class="section-name selfRef">Variable-Length Integers</a>
         </h3>
-<p id="section-10.1-1">Contact lengths use a variable-length integer of one to nine octets. The shortest encoding <span class="bcp14">MUST</span> be used. Let <code>bit_width(v)</code> be zero when <code>v</code> is zero, and otherwise one plus the index of the highest set bit.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-10.1-2.1">
-            <p id="section-10.1-2.1.1">If <code>v</code> is zero, the length <code>L</code> is 1. Otherwise <code>L</code> is the minimum of 9 and <code>floor((bit_width(v) + 6) / 7)</code>.<a href="#section-10.1-2.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-10.1-2.2">
-            <p id="section-10.1-2.2.1">When <code>L</code> is 9, the encoding is the octet <code>0xFF</code> followed by <code>v</code> as eight octets.<a href="#section-10.1-2.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-10.1-2.3">
-            <p id="section-10.1-2.3.1">When <code>L</code> is 1, the encoding is the single octet <code>v</code>. Values 0 through 127 use this form.<a href="#section-10.1-2.3.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-10.1-2.4">
-            <p id="section-10.1-2.4.1">Otherwise the encoding is <code>L</code> octets. Write <code>v</code> into the most significant <code>L</code> octets of a 64-bit big-endian integer, which is <code>v</code> shifted left by <code>(8 - L) * 8</code>. Then set the high <code>(L - 1)</code> bits of the first octet by OR with the low eight bits of <code>0xFF &lt;&lt; (9 - L)</code>.<a href="#section-10.1-2.4.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-10.1-3">A decoder reads the run of leading one bits in the first octet. Eight leading ones mean a nine-octet encoding and a 64-bit value in the following eight octets. <code>N</code> leading ones for <code>N</code> from 0 through 7 mean a length of <code>N + 1</code>. The value is the low <code>(8 - L)</code> bits of the first octet followed by the remaining <code>L - 1</code> octets. An encoding that is not the shortest form, or that sets a bit the encoder leaves clear, <span class="bcp14">MUST</span> be rejected.<a href="#section-10.1-3" class="pilcrow">¶</a></p>
+<p id="section-10.1-1">A varint <span class="bcp14">MUST</span> use the variable-length integer encoding in <span>[<a href="#MOQT" class="cite xref">MOQT</a>], <a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-23#section-8.1" class="relref">Section 8.1</a></span>. The number of leading 1 bits in the first octet gives the length. An encoding is one to nine octets and represents an unsigned integer of up to 64 bits. A sender <span class="bcp14">MAY</span> use any encoding length that can represent the value. A receiver <span class="bcp14">MUST</span> accept any such encoding.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="common-header">
@@ -2261,7 +2294,7 @@ Common Header {
             </tr>
           </tbody>
         </table>
-<p id="section-10.3-2">An unknown type is a connection error.<a href="#section-10.3-2" class="pilcrow">¶</a></p>
+<p id="section-10.3-2">Message type 0, message type 3, and any type that is not assigned in the table are unknown. An unknown type is a connection error, application error INVALID_CTRL_MSG_TYPE.<a href="#section-10.3-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="node-info">
@@ -2294,7 +2327,7 @@ Path Item {
 <figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
 <a href="#name-node-information-2" class="selfRef">Node information</a>
           </figcaption></figure>
-<p id="section-10.4-3">Node Type is a value from <a href="#node-types" class="auto internal xref">Section 3.1</a>. Contact Length is a <a href="#varint" class="auto internal xref">Section 10.1</a> count of the following octets.<a href="#section-10.4-3" class="pilcrow">¶</a></p>
+<p id="section-10.4-3">Node Type is a value from <a href="#node-types" class="auto internal xref">Section 3.1</a>. Any other value is malformed. An unknown type in CONNECT is rejected with response code Connect Error, and the acceptor then closes the connection. An unknown type in CONNECT_RESPONSE makes the initiator close the connection, and no information-base state is created. An unknown type in a node advertisement or withdrawal is a connection error, application error INVALID_ENCODING. Contact Length is a <a href="#varint" class="auto internal xref">Section 10.1</a> count of the following octets.<a href="#section-10.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="connect">
@@ -2319,7 +2352,7 @@ CONNECT Message {
 <figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
 <a href="#name-connect-2" class="selfRef">CONNECT</a>
           </figcaption></figure>
-<p id="section-10.5-3">Peer Mode is a value from the session mode table. Token Present is 1 when a token follows and 0 when mutual TLS alone is used. Any other value is a malformed message. Token Length is a <a href="#varint" class="auto internal xref">Section 10.1</a> count of the following token octets. The token is opaque. Node Info describes the initiator and has an empty path. The token fields come before Node Info so the node path can still occupy the remainder of the message.<a href="#section-10.5-3" class="pilcrow">¶</a></p>
+<p id="section-10.5-3">Peer Mode is a value from the session mode table. Any other value is rejected with response code Peering Mode Not Allowed, and the acceptor then closes the connection. Token Present is 1 when a token follows and 0 when mutual TLS alone is used. Any other value is a malformed message. Token Length is a <a href="#varint" class="auto internal xref">Section 10.1</a> count of the following token octets. The token is opaque. Node Info describes the initiator and has an empty path. The token fields come before Node Info so the node path can still occupy the remainder of the message.<a href="#section-10.5-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="connectresponse">
@@ -2448,8 +2481,9 @@ SUBSCRIBE_INFO_WD Message {
 <figcaption><a href="#figure-7" class="selfRef">Figure 7</a>:
 <a href="#name-subscribe-information-messa" class="selfRef">Subscribe information messages</a>
           </figcaption></figure>
-<p id="section-10.8-2">Sequence is the source node's counter for this subscribe. Source Node ID is the subscriber relay. The three hashes are defined in <a href="#names" class="auto internal xref">Section 6</a>. Priority is the subscriber's priority. Delivery Timeout and Expires are milliseconds. Zero means the parameter is unset. Forward is zero to pause forwarding and non-zero to forward. New Group Present is 1 when New Group Request ID follows and 0 when it does not. Any other value is a malformed message.<a href="#section-10.8-2" class="pilcrow">¶</a></p>
-<span id="name-track-name"></span><figure id="figure-8">
+<p id="section-10.8-2">Sequence is the delayed-update counter for this subscribe entry, as defined in <a href="#subscribe-ib" class="auto internal xref">Section 5.3</a>. Source Node ID is the subscriber relay. The three hashes are defined in <a href="#names" class="auto internal xref">Section 6</a>. Priority is the subscriber's priority. Delivery Timeout and Expires are milliseconds. Zero means the parameter is unset. Forward is zero to pause forwarding and non-zero to forward. New Group Present is 1 when New Group Request ID follows and 0 when it does not. Any other value is a malformed message.<a href="#section-10.8-2" class="pilcrow">¶</a></p>
+<span id="name-track-name"></span><div id="track-name">
+<figure id="figure-8">
           <div class="alignLeft art-text artwork" id="section-10.8-3.1">
 <pre>
 Track Name {
@@ -2465,10 +2499,11 @@ Track Name {
 <figcaption><a href="#figure-8" class="selfRef">Figure 8</a>:
 <a href="#name-track-name" class="selfRef">Track name</a>
           </figcaption></figure>
-<p id="section-10.8-4">Tuple Count is the number of namespace tuples. Each tuple is a 16-bit length and that many octets. Name Length is a 16-bit length. Zero means the name is empty. Tuple Count and the lengths <span class="bcp14">MUST</span> fit in the message. A count or length that runs past Message Length is a malformed message.<a href="#section-10.8-4" class="pilcrow">¶</a></p>
+</div>
+<p id="section-10.8-4">Tuple Count is the number of namespace tuples. Each tuple is a 16-bit length and that many octets. Name Length is a 16-bit length of Name Octets. Zero means those octets are empty. Tuple Count and the lengths <span class="bcp14">MUST</span> fit in the message. A count or length that runs past Message Length is a malformed message. Subscribe and announce messages use this same structure.<a href="#section-10.8-4" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="announce-information">
+<div id="announce-info">
 <section id="section-10.9">
         <h3 id="name-announce-information">
 <a href="#section-10.9" class="section-number selfRef">10.9. </a><a href="#name-announce-information" class="section-name selfRef">Announce Information</a>
@@ -2496,10 +2531,13 @@ ANNOUNCE_INFO_WD Message {
 <figcaption><a href="#figure-9" class="selfRef">Figure 9</a>:
 <a href="#name-announce-information-messag" class="selfRef">Announce information messages</a>
           </figcaption></figure>
-<p id="section-10.9-2">Source Node ID is the origin relay. Bit 0 of Flags is 0 for a single track and 1 for a namespace announcement. A namespace announcement has an empty track name. All other flag bits <span class="bcp14">MUST</span> be sent as zero and <span class="bcp14">MUST</span> be ignored on receipt.<a href="#section-10.9-2" class="pilcrow">¶</a></p>
+<p id="section-10.9-2">Source Node ID is the origin relay. Track Name is the structure in <a href="#track-name" class="auto internal xref">Figure 8</a>. It carries the namespace tuples and the track-name octets for an advertisement and for a withdrawal. Full Name Hash is the full-name hash defined in <a href="#names" class="auto internal xref">Section 6</a>. The message does not carry the namespace hash or the name hash. The receiver derives both from Track Name.<a href="#section-10.9-2" class="pilcrow">¶</a></p>
+<p id="section-10.9-3">Bit 0 of Flags selects the kind. Zero is a single track. One is a namespace. All other flag bits <span class="bcp14">MUST</span> be sent as zero and <span class="bcp14">MUST</span> be ignored on receipt.<a href="#section-10.9-3" class="pilcrow">¶</a></p>
+<p id="section-10.9-4">A track announcement uses Name Octets as the track name. Name Length <span class="bcp14">MAY</span> be zero, and the announcement is still a track. A namespace announcement covers the tracks in the namespace given by the tuples. Its Name Length <span class="bcp14">MUST</span> be zero, and Name Octets <span class="bcp14">MUST</span> be empty. A namespace announcement with a non-zero Name Length is a malformed message.<a href="#section-10.9-4" class="pilcrow">¶</a></p>
+<p id="section-10.9-5">The receiver <span class="bcp14">MUST</span> recompute the full-name hash from Track Name and <span class="bcp14">MUST</span> treat a mismatch with Full Name Hash as a malformed message. The namespace hash is CityHash64 of the concatenated tuple octets. The name hash is CityHash64 of Name Octets, which is the hash of zero octets when Name Length is zero. The full-name hash combines those two values as in <a href="#names" class="auto internal xref">Section 6</a>. The same check applies to a track announcement, a namespace announcement, an advertisement, and a withdrawal.<a href="#section-10.9-5" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="subscriber-node-set-1">
+<div id="subscriber-node-set">
 <section id="section-10.10">
         <h3 id="name-subscriber-node-set-2">
 <a href="#section-10.10" class="section-number selfRef">10.10. </a><a href="#name-subscriber-node-set-2" class="section-name selfRef">Subscriber Node Set</a>
@@ -2570,8 +2608,8 @@ Data Header {
             <tr>
               <td class="text-right" rowspan="1" colspan="1">1</td>
               <td class="text-left" rowspan="1" colspan="1">EXISTING_STREAM</td>
-              <td class="text-right" rowspan="1" colspan="1">0</td>
-              <td class="text-left" rowspan="1" colspan="1">Not encoded. Bytes after a new-stream header have no peering header.</td>
+              <td class="text-right" rowspan="1" colspan="1">none</td>
+              <td class="text-left" rowspan="1" colspan="1">Not a wire value. A received header with this type is an error.</td>
             </tr>
             <tr>
               <td class="text-right" rowspan="1" colspan="1">2</td>
@@ -2635,7 +2673,7 @@ NEW_STREAM {
           <h4 id="name-existing-stream-bytes">
 <a href="#section-10.11.3" class="section-number selfRef">10.11.3. </a><a href="#name-existing-stream-bytes" class="section-name selfRef">Existing Stream Bytes</a>
           </h4>
-<p id="section-10.11.3-1">After NEW_STREAM, further payload on the same QUIC stream is sent with no peering header. The SNS ID, full-name hash, priority, and time-to-live stay those of the NEW_STREAM header that opened the stream. An implementation classifies those bytes as existing-stream data locally. It does not put Data Type 1 on the wire.<a href="#section-10.11.3-1" class="pilcrow">¶</a></p>
+<p id="section-10.11.3-1">After NEW_STREAM, further payload on the same QUIC stream is sent with no peering header. The SNS ID, full-name hash, priority, and time-to-live stay those of the NEW_STREAM header that opened the stream. An implementation classifies those bytes as existing-stream data locally. It does not put Data Type 1 on the wire. A stream whose first header has a Data Type other than 2, including type 1, is reset with application error INVALID_START_OF_STREAM. A datagram whose Data Type is not 0 is discarded.<a href="#section-10.11.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2718,7 +2756,7 @@ NEW_STREAM {
           </tr>
         </tbody>
       </table>
-<p id="section-11-3">A CONNECT_RESPONSE with a non-zero response code refuses the session. The acceptor closes the connection after sending it. Response code 2 corresponds to a peer that completed mutual TLS and then failed token authentication, token authorization, or the Node ID policy. A TLS failure does not produce CONNECT_RESPONSE, because CONNECT is not sent when the handshake fails.<a href="#section-11-3" class="pilcrow">¶</a></p>
+<p id="section-11-3">A CONNECT_RESPONSE with a non-zero response code refuses the session. An unknown response code is a refusal as well. The initiator closes the connection and creates no information-base state. The acceptor closes the connection after sending a non-zero code. Response code 2 corresponds to a peer that completed mutual TLS and then failed token authentication, token authorization, or the Node ID policy. A TLS failure does not produce CONNECT_RESPONSE, because CONNECT is not sent when the handshake fails.<a href="#section-11-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="operational-considerations">
@@ -2752,10 +2790,11 @@ NEW_STREAM {
 <p id="section-13-1">Mutual TLS, as specified in <a href="#authentication" class="auto internal xref">Section 7.2</a>, authenticates every peering session. An <span class="bcp14">OPTIONAL</span> token in CONNECT provides additional authentication and authorization. A node that skips verification of the peer certificate accepts a session from any endpoint that completes the handshake and can then inject node, announce, and subscribe state. Implementations <span class="bcp14">MUST</span> authenticate the peer before CONNECT. A token is a credential. Implementations <span class="bcp14">MUST NOT</span> log it, and they <span class="bcp14">MUST</span> treat a missing or rejected token as Not Authorized when local policy requires one.<a href="#section-13-1" class="pilcrow">¶</a></p>
 <p id="section-13-2">The certificate checks in <a href="#authentication" class="auto internal xref">Section 7.2</a> exclude expired credentials, weak public keys, and MD5 or SHA-1 signatures. Trust anchors and any explicitly trusted self-signed certificates are deployment configuration. A self-signed certificate used beyond a closed domain will not be accepted by a peer that requires a chain to a known anchor.<a href="#section-13-2" class="pilcrow">¶</a></p>
 <p id="section-13-3">The authenticated identity is bound to the Node ID in CONNECT. Without that binding, a peer that holds a valid certificate could advertise a Node ID it does not own and attract object flows. Policy at the acceptor enforces the binding and returns Not Authorized when it fails.<a href="#section-13-3" class="pilcrow">¶</a></p>
-<p id="section-13-4">Control peering distributes the names of tracks and the identities of the relays that publish or subscribe. Filtering announce and subscribe advertisements is the mechanism that keeps a track inside a region or a customer boundary. A missing filter is a data leak, because an origin relay that learns a subscribe will forward objects toward that subscriber relay.<a href="#section-13-4" class="pilcrow">¶</a></p>
-<p id="section-13-5">Object payloads are opaque to intermediate relays and are protected by the QUIC session on each hop. This protocol does not add a second encryption layer. End-to-end confidentiality and integrity of <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> objects are the responsibility of the application and of <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>, not of the peering encapsulation. Each hop can read the payload bytes it forwards.<a href="#section-13-5" class="pilcrow">¶</a></p>
-<p id="section-13-6">The subscriber node set tells a data peer which Edge nodes receive a flow. That is visible to every hop on the data path. Deployments that treat the set of receivers as sensitive keep data sessions inside the same trust domain that already carries the objects.<a href="#section-13-6" class="pilcrow">¶</a></p>
-<p id="section-13-7">An implementation <span class="bcp14">MUST</span> bound the memory used for information bases, for subscriber node sets, and for objects that arrive before their set advertisement. An unbounded buffer is a denial-of-service vector.<a href="#section-13-7" class="pilcrow">¶</a></p>
+<p id="section-13-4">The name hashes in <a href="#names" class="auto internal xref">Section 6</a> are 64-bit CityHash64 forwarding keys. A collision merges two names into one peering track, so objects for one name can be delivered on the subscribe state of the other. A peer that is allowed to choose track names can attempt that collision. The hash check on a subscribe or an announce accepts the message when the hash field matches the octets in that same message. A second name that hashes to a key already in use joins that same track.<a href="#section-13-4" class="pilcrow">¶</a></p>
+<p id="section-13-5">Control peering distributes the names of tracks and the identities of the relays that publish or subscribe. Filtering announce and subscribe advertisements is the mechanism that keeps a track inside a region or a customer boundary. A missing filter is a data leak, because an origin relay that learns a subscribe will forward objects toward that subscriber relay.<a href="#section-13-5" class="pilcrow">¶</a></p>
+<p id="section-13-6">Object payloads are opaque to intermediate relays and are protected by the QUIC session on each hop. This protocol does not add a second encryption layer. End-to-end confidentiality and integrity of <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span> objects are the responsibility of the application and of <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>, not of the peering encapsulation. Each hop can read the payload bytes it forwards.<a href="#section-13-6" class="pilcrow">¶</a></p>
+<p id="section-13-7">The subscriber node set tells a data peer which Edge nodes receive a flow. That is visible to every hop on the data path. Deployments that treat the set of receivers as sensitive keep data sessions inside the same trust domain that already carries the objects.<a href="#section-13-7" class="pilcrow">¶</a></p>
+<p id="section-13-8">An implementation <span class="bcp14">MUST</span> bound the memory used for information bases, for subscriber node sets, and for objects that arrive before their set advertisement. An unbounded buffer is a denial-of-service vector.<a href="#section-13-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
