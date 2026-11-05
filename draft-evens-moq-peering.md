@@ -49,7 +49,7 @@ normative:
 
 --- abstract
 
-This document defines the relay peering protocol used by Media over QUIC ({{MOQT}}) relays to exchange node, announce, and subscribe information and to forward objects between relays. Peering is split into control peering and data peering. Control peering stays established and carries the information bases. Data peering carries objects and may be pre-established or opened on demand. The two functions may share one QUIC session or use separate sessions. A peering session uses mutual TLS, together with an optional token for authentication and authorization, before the peers exchange peering state.
+This document defines the relay peering protocol used by Media over QUIC ({{MOQT}}) relays to exchange node, announce, and subscribe information and to forward objects between relays. Peering is split into control peering and data peering. Control peering stays established and carries the information bases. Data peering carries objects and MAY be pre-established or opened on demand. The two functions MAY share one QUIC session or use separate sessions. A peering session uses mutual TLS, together with an OPTIONAL token for authentication and authorization, before the peers exchange peering state.
 
 --- middle
 
@@ -59,9 +59,9 @@ This document defines the relay peering protocol used by Media over QUIC ({{MOQT
 
 This document specifies how relays peer. Each relay keeps information bases that describe the nodes it can reach, the tracks that have been announced, and the subscribes that are active. Relays exchange those bases on control peering. They forward object bytes on data peering, using a subscriber node set to say which subscriber relays need the objects. Each hop chooses its own next hop from the node information base.
 
-Control peering is always on for a peering relationship that exchanges information bases. Data peering may already be up, or a relay may open it when a forwarding path needs it. One QUIC connection can carry both, or the functions can use different connections. Several data connections may exist between the same pair of relays.
+Control peering is always on for a peering relationship that exchanges information bases. Data peering MAY already be up, or a relay MAY open it when a forwarding path needs it. One QUIC connection can carry both, or the functions can use different connections. Several data connections MAY exist between the same pair of relays.
 
-The QUIC handshake authenticates both endpoints with mutual TLS. An optional token authenticates and authorizes the session as well, before the peers exchange information bases.
+The QUIC handshake authenticates both endpoints with mutual TLS. An OPTIONAL token authenticates and authorizes the session as well, before the peers exchange information bases.
 
 # Terminology
 
@@ -79,7 +79,7 @@ Control peering:
 : A peering function that exchanges information bases. It is kept established for the life of the peering relationship.
 
 Data peering:
-: A peering function that forwards objects. It may be established before there is anything to send, or opened when a path needs it.
+: A peering function that forwards objects. It MAY be established before there is anything to send, or opened when a path needs it.
 
 Peering session:
 : One QUIC connection between two nodes, used for control peering, data peering, or both.
@@ -132,7 +132,7 @@ Via nodes are placed where many Edge nodes can share one fan-out. An Edge node u
 
 An Edge node accepts {{MOQT}} client sessions and peering sessions. It is the node that turns a client announce or subscribe into information-base state, and the node that turns received objects back into {{MOQT}} objects for local subscribers. It computes subscriber node sets for the data sessions it sends on.
 
-An Edge node may sit behind a load balancer or an anycast address. The contact string advertised for the node is the name or address peers use to open a session, which may be the load balancer rather than an individual process.
+An Edge node MAY sit behind a load balancer or an anycast address. The contact string advertised for the node is the name or address peers use to open a session, which MAY be the load balancer rather than an individual process.
 
 ### Stub
 
@@ -140,7 +140,7 @@ A Stub node is a lightweight child of one or more Edge parents. It dials those p
 
 The parent Edge regenerates announce and subscribe state with its own Node ID as the source. Other relays see the parent, not the Stub. A Stub that has many local subscribers still produces one peering subscribe for a track at the parent. The parent is the s-relay and the o-relay for the rest of the network.
 
-A client implementation may speak this protocol as a Stub instead of opening a {{MOQT}} session to an Edge. The Edge still presents that client to the rest of the network as its own.
+A client implementation MAY speak this protocol as a Stub instead of opening a {{MOQT}} session to an Edge. The Edge still presents that client to the rest of the network as its own.
 
 ## Relay Roles
 
@@ -163,7 +163,7 @@ Publisher --> Origin Edge --+--> Subscriber Edge --> Subscriber
 ~~~
 {: artwork-align="center" artwork-name="Direct edge-to-edge forwarding" }
 
-When several subscriber Edges share a region, or when the direct path is not allowed, the origin Edge forwards to a Via. The Via splits the same objects toward the subscriber Edges. Further Via hops may be added to steer the network path. Via nodes can be added or removed for a track without resetting the publisher's {{MOQT}} session. An object stream already open on the previous hop drains there. A new stream and every datagram use the new hop.
+When several subscriber Edges share a region, or when the direct path is not allowed, the origin Edge forwards to a Via. The Via splits the same objects toward the subscriber Edges. Further Via hops MAY be added to steer the network path. Via nodes can be added or removed for a track without resetting the publisher's {{MOQT}} session. An object stream already open on the previous hop drains there. A new stream and every datagram use the new hop.
 
 ~~~
 Publisher --> Origin Edge --> Via --> Subscriber Edge --> Subscriber
@@ -182,11 +182,11 @@ There is one control relationship between two nodes. If both nodes open a sessio
 
 When a control session ends, each side removes node, announce, and subscribe state learned only through that session and selects paths again. Object state that belongs to a data session is removed when that data session ends.
 
-The initiator of a session opens one bidirectional QUIC stream and sends every control message on it. CONNECT is the first message. The acceptor latches onto that stream and sends CONNECT_RESPONSE and later control messages on it. The initiator may open a replacement bidirectional stream. The acceptor adopts the new stream when a control message arrives on it and resets the previous control stream if that stream is still open. Two control streams are not in use at once.
+The initiator of a session opens one bidirectional QUIC stream and sends every control message on it. CONNECT is the first message. The acceptor latches onto that stream and sends CONNECT_RESPONSE and later control messages on it. The initiator MAY open a replacement bidirectional stream. The acceptor adopts the new stream when a control message arrives on it and resets the previous control stream if that stream is still open. Two control streams are not in use at once.
 
 ## Data Peering
 
-Data peering forwards object bytes. QUIC streams opened for objects are unidirectional and are opened by the sender. A session may carry objects in one direction or in both. Both directions are required for a Stub, and for any node that must receive return traffic on a connection it opened because of address translation or a firewall. Additional data sessions between the same pair spread object streams across paths that the network can load-balance.
+Data peering forwards object bytes. QUIC streams opened for objects are unidirectional and are opened by the sender. A session MAY carry objects in one direction or in both. Both directions are REQUIRED for a Stub, and for any node that MUST receive return traffic on a connection it opened because of address translation or a firewall. Additional data sessions between the same pair spread object streams across paths that the network can load-balance.
 
 The bidirectional stream on a data session carries CONNECT, CONNECT_RESPONSE, and the subscriber node set for that session. It does not carry the shared information bases.
 
@@ -196,7 +196,7 @@ A subscriber node set is meaningful only on the session that will receive the ob
 
 Mode Both puts control peering and data peering on one QUIC connection. The information bases and the subscriber node sets share that connection's control stream. Object bytes still use unidirectional streams and datagrams on that connection. A Stub uses this mode.
 
-Mode Control and mode Data split the functions. The control session stays up and carries the information bases. Each data session is a separate QUIC connection. Object bytes and that session's subscriber node sets stay on the data connection. A node may have one control session and zero or more data sessions toward the same peer.
+Mode Control and mode Data split the functions. The control session stays up and carries the information bases. Each data session is a separate QUIC connection. Object bytes and that session's subscriber node sets stay on the data connection. A node MAY have one control session and zero or more data sessions toward the same peer.
 
 ~~~
 +-------------------+          +-------------------+
@@ -216,9 +216,9 @@ Mode Control and mode Data split the functions. The control session stays up and
 Data peering has two establishment styles.
 
 * Pre-established. The data session is configured and connected before a subscriber needs it. Path selection can use it immediately. This is appropriate for Via hops and for Edge pairs that exchange objects continuously.
-* On demand. The data session is opened when path selection needs a next hop that has no data session, and it may be closed when no subscriber node set still uses it. Control peering is not opened and closed this way.
+* On demand. The data session is opened when path selection needs a next hop that has no data session, and it MAY be closed when no subscriber node set still uses it. Control peering is not opened and closed this way.
 
-An implementation may use either style, or both. Closing a data session does not withdraw information bases. Closing the control session does.
+An implementation MAY use either style, or both. Closing a data session does not withdraw information bases. Closing the control session does.
 
 ## What Each Session Exchanges
 
@@ -265,7 +265,7 @@ Stub nodes are not inserted into the node information base beyond their parent.
 
 Every node that appears in the node information base MUST be configured with a distinct Node ID. When two advertisements carry the same Node ID on different sessions, path selection keeps the better candidate. Operators assign the identifier. A deployment that hashes a host name or a device identifier to fill the 64-bit value MUST ensure the result does not collide inside the peering domain.
 
-The textual form is `<high>:<low>`. The colon is required. Each side is an unsigned 32-bit integer in decimal, or two unsigned 16-bit integers separated by a dot. The two styles may be mixed.
+The textual form is `<high>:<low>`. The colon is REQUIRED. Each side is an unsigned 32-bit integer in decimal, or two unsigned 16-bit integers separated by a dot. The two styles MAY be mixed.
 
 | Text | High | Low |
 |:-----|-----:|----:|
@@ -288,7 +288,7 @@ Type:
 : The node type from {{node-types}}.
 
 Contact:
-: An octet string that tells a peer how to open a QUIC connection to this node. It is typically a DNS name or an address literal, and it may include a port. The contact may name a load balancer or an anycast address.
+: An octet string that tells a peer how to open a QUIC connection to this node. It is typically a DNS name or an address literal, and it MAY include a port. The contact MAY name a load balancer or an anycast address.
 
 Longitude, Latitude:
 : The node location in degrees, as binary64 values. Policy use of these values is deployment-specific.
@@ -332,7 +332,7 @@ Each advertisement and withdrawal from the source node carries a 16-bit sequence
 
 The entry carries the track hashes, the subscribe parameters, and the namespace and track-name octets. The octets let the origin relay construct the {{MOQT}} subscribe toward the publisher. Other relays can forward the entry without interpreting the name. A receiver MUST recompute the hashes from the name octets and MUST treat a mismatch as a malformed message.
 
-Policy may filter subscribe advertisements the way it filters announces. An origin relay that never receives a subscribe does not forward objects for it. That is how a deployment keeps a publisher inside a region or a service class.
+Policy MAY filter subscribe advertisements the way it filters announces. An origin relay that never receives a subscribe does not forward objects for it. That is how a deployment keeps a publisher inside a region or a service class.
 
 On receipt, the origin relay compares the subscribe with the announce information base. Tuple hashes are compared in order. A shorter namespace matches when each of its tuples equals the corresponding tuple of the longer name. An exact track match uses the full-name hash. A match causes the origin relay to subscribe toward the publisher, if it has not already, and to build a subscriber node set toward the source node of the subscribe.
 
@@ -350,13 +350,13 @@ The table is updated when a node advertisement changes the best session, when a 
 
 The subscriber node set is the data-plane description of who needs a flow. It lists subscriber-relay Node IDs. It does not list the hops between them. Each hop looks those Node IDs up in the node information base and chooses the next data session.
 
-The sender allocates a 32-bit identifier for the set on the session that will carry the objects. The identifier starts at 1 and increases. It may skip values. It wraps to 1 after 4294967294. Zero is reserved and means "no set". The same identifier is updated in place when subscribers are added or removed, so object streams that already cite the identifier stay valid.
+The sender allocates a 32-bit identifier for the set on the session that will carry the objects. The identifier starts at 1 and increases. It MAY skip values. It wraps to 1 after 4294967294. Zero is reserved and means "no set". The same identifier is updated in place when subscribers are added or removed, so object streams that already cite the identifier stay valid.
 
 The set is advertised on the control stream of the data session, or of the combined session, that will receive the objects. It is not propagated as an information base. When the receiving node is itself listed, it delivers matching objects to local subscribers, using the full-name hash carried on the object header. For every other Node ID in the set, it builds an egress set toward the chosen next hop and advertises that egress set on that next session.
 
 A withdrawal retires one identifier on that session. Ending the session retires every identifier learned on it.
 
-Objects may arrive before the set advertisement that names their identifier. The receiver SHOULD hold those objects until the advertisement arrives, and MUST discard them if the session ends or the identifier is withdrawn first.
+Objects MAY arrive before the set advertisement that names their identifier. The receiver SHOULD hold those objects until the advertisement arrives, and MUST discard them if the session ends or the identifier is withdrawn first.
 
 # Names and Hashes {#names}
 
@@ -385,11 +385,11 @@ Prefix matching uses the CityHash64 of each tuple, compared in order. A namespac
 
 The connection uses {{QUIC}} with the TLS handshake specified by {{QUIC-TLS}}. Implementations MUST NOT negotiate a TLS version older than TLS 1.3 {{TLS}}. The ALPN token MUST be `moq-peering`.
 
-Either node may open the connection. The node that opens it is the initiator and sends CONNECT. The node that accepts it sends CONNECT_RESPONSE.
+Either node MAY open the connection. The node that opens it is the initiator and sends CONNECT. The node that accepts it sends CONNECT_RESPONSE.
 
 ## Authentication {#authentication}
 
-Authentication and authorization are part of session setup and finish before information bases are exchanged. Every session uses mutual TLS. A deployment MAY also use a token for authentication and authorization. The token is optional. When the acceptor's policy does not require one, the mutual TLS identity is sufficient to authorize the session.
+Authentication and authorization are part of session setup and finish before information bases are exchanged. Every session uses mutual TLS. A deployment MAY also use a token for authentication and authorization. The token is OPTIONAL. When the acceptor's policy does not require one, the mutual TLS identity is sufficient to authorize the session.
 
 * Each node presents a certificate in the TLS handshake and MUST authenticate the peer.
 * The initiator MUST NOT send CONNECT until the handshake has completed and the peer certificate has been accepted.
@@ -407,22 +407,22 @@ Certificate material is configuration. Peering messages do not carry certificate
 
 A self-signed certificate is suitable only where every peer is configured to trust that exact certificate, such as a laboratory or a closed relay domain. It is not a substitute for a trust anchor on an open network.
 
-Mutual TLS establishes the peer identity. CONNECT carries the Node ID, the requested session mode, and the optional token. The acceptor binds the Node ID to the mutual TLS identity and, when a token is present, to that token. A Node ID that the policy does not allow for that identity is rejected with response code Not Authorized. A requested mode that the policy does not allow is rejected with response code Peering Mode Not Allowed. The token is an opaque octet string. Its format and the authority that issues it are deployment policy. Implementations MUST NOT embed tokens in source.
+Mutual TLS establishes the peer identity. CONNECT carries the Node ID, the requested session mode, and the OPTIONAL token. The acceptor binds the Node ID to the mutual TLS identity and, when a token is present, to that token. A Node ID that the policy does not allow for that identity is rejected with response code Not Authorized. A requested mode that the policy does not allow is rejected with response code Peering Mode Not Allowed. The token is an opaque octet string. Its format and the authority that issues it are deployment policy. Implementations MUST NOT embed tokens in source.
 
 Deployments SHOULD use the key-exchange groups provided by their QUIC stack for TLS 1.3, including a hybrid post-quantum group when the stack and the peer both support one. Signature algorithms and certificate keys remain the ones listed above.
 
 ## Handshake Messages
 
-After the QUIC handshake, the initiator opens the control stream and sends CONNECT. The message contains the session mode, the initiator's own node information with an empty path, and the optional authentication and authorization token. The acceptor evaluates the mutual TLS identity and that token, then responds with CONNECT_RESPONSE. On success the response contains the acceptor's own node information, again with an empty path. On failure the response contains only the response code, and the acceptor closes the connection.
+After the QUIC handshake, the initiator opens the control stream and sends CONNECT. The message contains the session mode, the initiator's own node information with an empty path, and the OPTIONAL authentication and authorization token. The acceptor evaluates the mutual TLS identity and that token, then responds with CONNECT_RESPONSE. On success the response contains the acceptor's own node information, again with an empty path. On failure the response contains only the response code, and the acceptor closes the connection.
 
-A control session or a mode Both session then synchronizes state. Each side sends the node, announce, and subscribe entries it is willing to advertise to that peer. The two directions are independent and have no required order. A data session does not send that synchronization. It sends subscriber node sets later, as object flows are created.
+A control session or a mode Both session then synchronizes state. Each side sends the node, announce, and subscribe entries it is willing to advertise to that peer. The two directions are independent and MAY occur in either order. A data session does not send that synchronization. It sends subscriber node sets later, as object flows are created.
 
 ~~~
 Initiator                         Acceptor
    |                                 |
    |-------- QUIC + mutual TLS ----->|
    |                                 |
-   |-------- CONNECT --------------->|  optional token
+   |-------- CONNECT --------------->|  OPTIONAL token
    |<------- CONNECT_RESPONSE -------|
    |                                 |
    |==== information bases =========>|   (Control or Both only)
@@ -790,7 +790,7 @@ Transport failures and protocol violations close the QUIC connection or reset th
 | Code | Name                    | Where | Meaning |
 |-----:|:------------------------|:------|:--------|
 | 1    | CLOSE                   | Connection | The endpoint is closing the session. |
-| 2    | REDIRECT                | Connection | The peer should move to another relay. |
+| 2    | REDIRECT                | Connection | The peer SHOULD move to another relay. |
 | 8    | NOT_AUTHORIZED          | Connection | Authentication or policy refused the peer. |
 | 32   | CONNECT_MISSING         | Connection | The first control message was not CONNECT. |
 | 33   | CONNECT_RESP_MISSING    | Connection | A unidirectional stream was opened before CONNECT_RESPONSE. |
@@ -814,7 +814,7 @@ A subscriber that leaves and rejoins quickly would otherwise withdraw and re-adv
 
 # Security Considerations
 
-Mutual TLS, as specified in {{authentication}}, authenticates every peering session. An optional token in CONNECT provides additional authentication and authorization. A node that skips verification of the peer certificate accepts a session from any endpoint that completes the handshake and can then inject node, announce, and subscribe state. Implementations MUST authenticate the peer before CONNECT. A token is a credential. Implementations MUST NOT log it, and they MUST treat a missing or rejected token as Not Authorized when local policy requires one.
+Mutual TLS, as specified in {{authentication}}, authenticates every peering session. An OPTIONAL token in CONNECT provides additional authentication and authorization. A node that skips verification of the peer certificate accepts a session from any endpoint that completes the handshake and can then inject node, announce, and subscribe state. Implementations MUST authenticate the peer before CONNECT. A token is a credential. Implementations MUST NOT log it, and they MUST treat a missing or rejected token as Not Authorized when local policy requires one.
 
 The certificate checks in {{authentication}} exclude expired credentials, weak public keys, and MD5 or SHA-1 signatures. Trust anchors and any explicitly trusted self-signed certificates are deployment configuration. A self-signed certificate used beyond a closed domain will not be accepted by a peer that requires a chain to a known anchor.
 
